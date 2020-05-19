@@ -1,0 +1,213 @@
+package denes;
+
+import java.io.*; 
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+
+class ClientStarterWorkerThread extends Thread {
+
+    private int ID;
+    private DataInputStream inputStream;
+
+    public ClientStarterWorkerThread(int clientID, DataInputStream inputStream) {
+        this.ID = clientID;
+        this.inputStream = inputStream;
+    }
+
+    @Override
+    public void run() {
+        // todo: Handle listening to messages
+    	int k;
+    	String rezVoBytes="";
+    	
+    	try{
+    		while((k=inputStream.read())!=-1)
+    		{
+    			rezVoBytes+=k;
+    		}
+    	}
+    	catch(IOException e)
+    	{
+    		e.printStackTrace();
+    	}
+    	System.out.println("ID: "+ID+" Poraka dobiena od drug klient"+rezVoBytes);
+    }
+}
+
+public class ClientStarter {
+
+    private int ID;
+    //todo: init other required variables here
+    Socket ss;
+
+    ClientStarter(int id, String host, int port) throws IOException {
+        this.ID = id;
+        // todo: Connect to server and send client ID
+        ss=new Socket(InetAddress.getByName(host), port);
+        PrintWriter pw=new PrintWriter(ss.getOutputStream(), true);
+        pw.println(Integer.toString(id));
+        pw.flush();
+        
+
+        // todo: Listen for incoming messages
+        listen();
+    }
+
+    // todo: Implement the sending message mechanism
+    void sendMessage(int idReceiver, String message) throws IOException {
+    	PrintWriter pw=new PrintWriter(ss.getOutputStream(), true);
+    	String poraka=message+": "+idReceiver;
+    	pw.println();
+    	pw.flush();
+    }
+
+    // todo: end communication - send END to server
+    private void endCommunication() throws IOException {
+    	PrintWriter pw=new PrintWriter(ss.getOutputStream(),true);
+    	pw.println("END "+ID);
+    	pw.flush();
+    }
+
+    // todo: listen for icoming messages from the server.
+    // It should start a separate thread to handle listening
+    // and not block the execution
+    // Should start a new ClientStarterWorkerThread
+    private void listen() throws IOException {
+    	
+    	Thread t=new ClientStarterWorkerThread(ID, new DataInputStream(ss.getInputStream()));
+    	t.start();
+
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        //todo: Initialize and start 3 clients
+
+    	
+    	
+    	
+    	
+        ClientStarter client1=new ClientStarter(1,"localhost",9876);
+        ClientStarter client2=new ClientStarter(2,"localhost",6789);
+        ClientStarter client3=new ClientStarter(3,"localhost",1234);
+
+        // Simulate chat
+        client1.sendMessage(2, "Hello from client 1");
+        Thread.sleep(1000);
+        client2.sendMessage(3, "Hello from client 2");
+        Thread.sleep(1000);
+        client1.sendMessage(3, "Hello from client 1");
+        Thread.sleep(1000);
+        client3.sendMessage(1, "Hello from client 3");
+        Thread.sleep(1000);
+        client3.sendMessage(2, "Hello from client 3");
+
+        // Exit the chatroom
+        client1.endCommunication();
+        client2.endCommunication();
+        client3.endCommunication();
+    }
+}
+
+ class TCPServer {
+	
+	class ServerWorkerThread extends Thread{
+		
+		InputStream inputStream;
+		Socket naKlientot;
+		
+		public ServerWorkerThread(InputStream is, Socket c1)
+		{
+			inputStream=is;
+			naKlientot=c1;
+		}
+		public void run(){
+			BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
+			String poraka="";
+			try{
+				poraka=br.readLine();
+				//AKO E PORAKA OD DRUG KLIENT
+				if(poraka.contains(":"))
+				{
+					String [] parts=poraka.split(":");
+					String recieverId=parts[1];
+					String msg=parts[0];
+					Socket destination=activeConnections.get(recieverId);
+					PrintWriter pw=new PrintWriter(destination.getOutputStream());
+					pw.print("Poraka od drug klient: "+msg);
+					pw.flush();		
+				}
+				//AKO E END PORAKA
+				else if(poraka.contains("END"))
+				{
+					String id=poraka.split(" ")[1];
+					endConnection(Integer.parseInt(id));
+					
+				}
+				//POCETNA PORAKA
+				else {
+					addConnection(Integer.parseInt(poraka), naKlientot);
+				}
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	
+	
+	
+
+    private ServerSocket server;
+    private HashMap<Integer, Socket> activeConnections;
+
+    // todo: Get the required connection
+    public Socket getConnection(int id) {
+    	return activeConnections.get(id);
+
+    }
+
+    // todo: Add connected client to the hash map
+    void addConnection(int id, Socket connection) {
+    	activeConnections.put(id,connection);
+
+    }
+
+    synchronized void endConnection(int id){
+        activeConnections.remove(id);
+    }
+
+    //todo: Initialize server
+    TCPServer(int port) throws IOException {
+    	server=new ServerSocket(port);
+    	activeConnections=new HashMap<Integer, Socket>();  	
+    }
+
+    // todo: Handle server listening
+    // todo: For each connection, start a separate
+    // todo: thread (ServerWorkerThread) to handle the communication
+    void listen() throws IOException {
+    	while(true)
+    	{
+    		Socket client=server.accept();
+    		Thread t=new ServerWorkerThread(client.getInputStream(),client);
+    		t.start();
+    	}
+
+    	
+    }
+
+    public static void main(String[] args) throws IOException {
+        // todo: Start server
+    	
+    	TCPServer myserv=new TCPServer(9876);
+    	System.out.println("Server active: "+myserv.server.getInetAddress());
+    	myserv.listen();
+
+    	
+    }
+}
