@@ -1,0 +1,44 @@
+package denes;
+
+public class TwoThreads{
+	
+	
+	public static class ThreadAB implements Runnable {
+	    String a;
+		String b;
+		
+		//Konstruktor
+		public ThreadAB(String a, String b)
+		{
+			this.a=a;
+			this.b=b;
+		}
+		//run() metoda
+		public void run(){
+			System.out.println(a);
+			System.out.println(b);
+		}	
+	}
+	
+	
+	
+	public static void main(String [] args)
+	{
+		//napraj nov objekt od klasata ThreadAB
+		ThreadAB nitka1=new ThreadAB("A", "B");
+		//napraj nitka od objektot
+		Thread n1=new Thread(nitka1);
+		//startuvaj ja nitkata
+		n1.start();
+		
+		ThreadAB nitka2=new ThreadAB("1", "2");
+		Thread n2=new Thread(nitka2);
+		n2.start();
+		
+
+	}
+	
+}
+	
+	
+
