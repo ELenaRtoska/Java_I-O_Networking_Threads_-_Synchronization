@@ -1,0 +1,133 @@
+package labs1;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class HW01_4 {
+
+	public static void main(String[] args) throws IOException {
+		BufferedReader fr=null;
+		BufferedWriter wr=null;
+		try {
+			fr=new BufferedReader(new FileReader("C:\\Users\\Elena (kozle) Rtoska\\Desktop\\prvaaa\\vtora\\rezultati.csv"));
+			File f=new File("C:\\Users\\Elena (kozle) Rtoska\\Desktop\\prvaaa\\vtora\\rezultati1.tsv");
+			if(!f.exists())
+			wr=new BufferedWriter(new FileWriter(f,true));
+			else
+			wr=new BufferedWriter(new FileWriter(f));
+			String line="";
+			while((line=fr.readLine())!=null) {
+				String[]parts=line.split(",");
+				double prosek=0.0;
+				wr.write(parts[0]+"\t");
+				for(int i=1;i<parts.length;i++) {
+					prosek=Double.parseDouble(parts[i])+prosek;
+					if(i!=parts.length-1)
+					wr.write(parts[i]+"\t");
+					else
+						wr.write(parts[i]);
+				}
+				
+				prosek=(double)(prosek/(parts.length-1));
+				wr.write(System.lineSeparator());
+				System.out.println(prosek);
+					System.out.println((int)prosek);
+			}
+		}catch(IOException e) {
+			throw e;
+		}
+		finally {
+			wr.flush();
+			wr.close();
+			fr.close();
+		}
+	
+	}
+
+}
+
+
+
+
+/*
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class HW01_4 {
+
+	public static void main(String [] args)throws IOException{
+		//String path=args[0];
+		//String word=args[1].toLoweCase();
+		String path="C:\\Users\\Elena (kozle) Rtoska\\Desktop\\prvaaa\\vtora\\write.txt";
+		String word="EleElena";
+		File f=new File(path);
+		BufferedReader br=new BufferedReader(new FileReader(f));
+		int count=0;
+		String line="";
+		while((line=br.readLine())!=null)
+		{
+			String [] words=line.split("\\W");
+			for(String word1 : words){
+				String impword=word1.toLowerCase();
+				if(word1.equals(word))
+					count++;
+			}
+		}
+		System.out.println(count);
+	}
+	
+	
+}
+	
+ */
+
+
+
+
+/*
+import java.io.*;
+import java.lang.RuntimeException;
+
+public class HW01_4
+{
+    public static void main(String [] args) throws IOException
+    {
+        //File datoteka = args[0];
+        FileInputStream in = new FileInputStream(args[0]);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String zbor = args[1];
+        String l;
+        String delovi[];
+        int brojac = 0;
+        while(true)
+        {
+            l = br.readLine();
+            if(l == null)
+            {
+                break;
+            }
+            delovi = l.split(" ");
+            for(int i=0;i<delovi.length;i++)
+            {
+                if(delovi[i].equals(zbor))
+                {
+                    brojac++;
+                }
+            }
+            System.out.println(br);
+            if(in != null)
+            {
+                in.close();
+            }
+        }
+    }
+}
+
+*/
