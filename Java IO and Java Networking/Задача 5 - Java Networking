@@ -1,0 +1,64 @@
+package labs1;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+class TCPClient{
+	public static void main(String[] args) throws IOException {
+			Socket clientSocket=null;
+		try {
+			clientSocket=new Socket("localhost",9876);
+			DataOutputStream outToServer=new DataOutputStream(clientSocket.getOutputStream());
+			//BufferedReader inFromUser=new BufferedReader(new InputStreamReader(System.in));
+			//String sentence=inFromUser.readLine();
+			//outToServer.writeBytes(sentence+"\n");
+			//outToServer.writeBytes(1.25+"\n");
+			//outToServer.writeBytes(123584124+"\n");
+			outToServer.writeDouble(1.25);
+			outToServer.writeLong(123584124);
+			outToServer.writeBoolean(true);
+			outToServer.writeUTF("UTF String");
+			outToServer.flush();
+			clientSocket.close();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			clientSocket.close();
+		}
+	
+	}
+}
+ class TCPServer {
+
+	public static void main(String[] args) throws IOException{
+		ServerSocket serversocket1=null;
+		try {
+			while(true)
+			{
+				serversocket1=new ServerSocket(9876);
+				Socket consocket=serversocket1.accept();
+				//BufferedReader messagesFromClient=new BufferedReader(new InputStreamReader(consocket.getInputStream()));
+				//String clientSentence=messagesFromClient.readLine();
+				//System.out.println("Received: "+clientSentence);				
+				DataInputStream mes=new DataInputStream(consocket.getInputStream());
+				System.out.println(mes.readDouble());
+				System.out.println(mes.readLong());
+				System.out.println(mes.readBoolean());
+				System.out.println(mes.readUTF());
+				consocket.close();
+				serversocket1.close();
+				
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+}
