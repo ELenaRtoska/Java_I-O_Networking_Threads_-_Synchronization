@@ -1,0 +1,166 @@
+package labs3;
+
+import java.io.DataInputStream;  
+import java.io.DataOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.*;
+
+
+public class Client {
+
+    private Socket socket;
+    private DataInputStream dis;
+    private DataOutputStream dos;
+    public Client(String host, int port) throws Exception
+    {
+        socket=new Socket(InetAddress.getByName(host),port);
+        //System.out.println("tuka sme");
+        dos=new DataOutputStream(socket.getOutputStream());
+        dis=new DataInputStream(socket.getInputStream());
+        this.glasaj();
+    }
+
+    private void glasaj() throws Exception {
+        new ClientThread(socket).start();
+    }
+
+    public static void main(String[] args) throws Exception {
+        for (int i=0;i<5;i++)
+        {
+            new Client("localhost",9876);
+        }
+    }
+}
+ class ClientThread extends Thread{
+     public static Lock lock;
+     private Socket s;
+     private DataInputStream dis;
+     private DataOutputStream dos;
+    public ClientThread(Socket s) throws Exception
+    {
+        this.s=s;
+        dos=new DataOutputStream(s.getOutputStream());
+        dis=new DataInputStream(s.getInputStream());
+        lock=new ReentrantLock();
+    }
+    @Override
+    public void run(){
+        try
+        {
+            synchronized (ClientThread.class) {
+                System.out.println(dis.readUTF());
+                Scanner scanner = new Scanner(System.in);
+                dos.writeUTF(scanner.nextLine());
+            }
+        }
+        catch (Exception e){}
+    }
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ import java.io.DataInputStream; 
+ import java.io.DataOutputStream;
+ import java.io.IOException;
+ import java.net.ServerSocket;
+ import java.net.Socket;
+ import java.util.*;
+ import java.util.concurrent.Semaphore;
+ import java.util.concurrent.locks.Lock;
+ import java.util.concurrent.locks.ReentrantLock;
+
+ public class ServerTCP {
+     public static Semaphore s= new Semaphore(100);
+         public ServerSocket serverSocket;
+         public Map<Integer, String> mapa;
+         public int[] lista;
+
+         public ServerTCP(int port) throws IOException {
+             serverSocket=new ServerSocket(port);
+             mapa=new TreeMap<>();
+             lista=new int[5];
+             for(int i=0;i<4;i++)
+                 lista[i]=0;
+             this.readCandidates();
+         }
+         public void readCandidates()
+         {
+             Scanner scanner=new Scanner(System.in);
+             for (int i=0;i<3;i++)
+                 mapa.put(Integer.parseInt(scanner.nextLine()),scanner.nextLine());
+         }
+         public void listen() throws Exception {
+             while (true)
+             {
+                 s.acquire();
+                 Socket client=serverSocket.accept();
+                 new ServerThread(this, client).start();
+
+             }
+         }
+         public String pecatiKandidati(){
+             StringBuilder sb= new StringBuilder();
+             for (Integer i: mapa.keySet())
+             {
+                 sb.append(String.format("%d. %s \n",i,mapa.get(i)));
+             }
+             return sb.toString();
+         }
+
+     public static void main(String[] args) throws Exception {
+         ServerTCP server = new ServerTCP(9876);
+         server.listen();
+     }
+
+ }
+
+
+ class ServerThread extends  Thread {
+     public static Lock lock;
+     public static Lock listaLock;
+     ServerTCP server;
+     DataInputStream dis;
+     Socket socket;
+     DataOutputStream dos;
+     public ServerThread(ServerTCP s, Socket s1) throws Exception {
+         server = s;
+         socket = s1;
+         dis = new DataInputStream(s1.getInputStream());
+         dos =  new DataOutputStream(s1.getOutputStream());
+         lock=new ReentrantLock();
+         listaLock=new ReentrantLock();
+     }
+
+     public void run() {
+             try {
+                 dos.writeUTF(server.pecatiKandidati());
+                 String line = dis.readUTF();
+                 {
+                     listaLock.lock();
+                     server.lista[Integer.parseInt(line)+1]++;
+                     System.out.println();
+                     for(Integer i: server.mapa.keySet())
+                     {
+                         System.out.println(i+" " + server.mapa.get(i) + " ima  " + server.lista[i + 1] + " glasovi" );
+                     }
+                     listaLock.unlock();
+                 }
+             } catch (IOException e) {
+                 e.printStackTrace();
+             }
+             finally {
+                 ServerTCP.s.release();
+             }
+
+
+     }
+ }
