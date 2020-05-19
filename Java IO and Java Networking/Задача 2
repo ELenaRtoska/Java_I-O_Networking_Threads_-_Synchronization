@@ -1,0 +1,85 @@
+package labs1;
+
+
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class HW01_2 {
+
+	public static void main(String[] args) throws IOException{
+		FileInputStream Fileinput=null;
+		FileOutputStream Fileoutput=null;
+		StringBuilder sb=null;
+		File f1=null;
+		File f2=null;
+		try {
+			f1=new File("./izvor.txt");
+			f1.createNewFile();
+			f2=new File("./destinacija.txt");
+			f2.createNewFile();
+			Fileinput=new FileInputStream(f1);
+			Fileoutput=new FileOutputStream(f2);
+			sb=new StringBuilder();
+			int c;
+			while((c=Fileinput.read())!=-1) {
+				sb.append((char)c);
+			}
+			Fileoutput.write(sb.reverse().toString().getBytes());
+//			System.out.println("The content from: "+f1.getName()+" was successfully coppied to: "+f2.getName());
+//			System.out.println("File: "+f1.getName() +"\t Path: "+f1.getAbsolutePath());
+//			System.out.println("File: "+f2.getName()+ "\t Path: "+f2.getAbsolutePath());
+			
+		}catch(IOException e){
+			throw e;
+		}
+		finally {
+			Fileoutput.flush();
+			Fileinput.close();
+			Fileoutput.close();
+		}
+		
+		//Desktop d=Desktop.getDesktop();
+		//d.getDesktop().open(f1.getParentFile());
+	}
+
+}
+
+
+
+
+
+/*
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Scanner;
+
+
+public class HW01_2 {
+
+	public static void main(String[] args) throws IOException {
+        File f= new File("izvor.txt");
+        RandomAccessFile f1 = new RandomAccessFile(f,"rw");
+        RandomAccessFile f2 = new RandomAccessFile(new File("destinacija.txt"),"rw");
+        if(f.exists())
+        {
+            for(long i=f1.length()-1;i>=0;i--)
+            {
+	             f1.seek(i);
+	             f2.write(f1.read());
+            }
+            f1.close();
+            f2.close();          
+        }else
+        	System.out.println("Fajlot: "+f.getName()+" ne postoi");   
+}
+}
+*/
