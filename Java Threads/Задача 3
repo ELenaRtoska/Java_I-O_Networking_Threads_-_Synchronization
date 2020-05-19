@@ -1,0 +1,104 @@
+package denes;
+import java.awt.Desktop;  
+import java.io.*;
+
+
+public class FileScanner  extends Thread{
+
+    private String fileToScan;
+    //TODO: Initialize the start value of the counter
+    private static Long counter=(long)0;
+
+    public FileScanner (String fileToScan) {
+        this.fileToScan=fileToScan;
+        //TODO: Increment the counter on every creation of FileScanner object
+    }
+
+    public static void printInfo(File file)  {
+
+        /*
+        * TODO: Print the info for the @argument File file, according to the requirement of the task
+        * */
+    	if(!file.isFile())
+    	System.out.println("dir: "+file.getAbsolutePath()+" "+file.length());
+    	else
+    		System.out.println("file: "+file.getAbsolutePath()+" "+file.length());
+    	
+    }
+
+    public static Long getCounter () {
+        return counter;
+    }
+    
+    public static synchronized void inc() {
+    	//FileScanner.counter=getCounter()+1;//=counter+1;
+    	FileScanner.counter++;
+    }
+
+    public void run() {
+
+        //TODO Create object File with the absolute path fileToScan.
+        File file=new File(fileToScan);
+
+        //TODO Create a list of all the files that are in the directory file.
+        File [] files = null;
+        files=file.listFiles();
+
+        for (File f : files) {
+
+            /*
+            * TODO If the File f is not a directory, print its info using the function printInfo(f)
+            * */
+        		if(!f.isDirectory())
+        			printInfo(f);
+        		else	
+        		/*
+            * TODO If the File f is a directory, create a thread from type FileScanner and start it.
+            * */
+        		{
+        			System.out.print(counter+" ");
+        			printInfo(f);
+        			FileScanner fs=new FileScanner(f.getAbsolutePath());
+        			Thread t=new Thread(fs);
+        			t.start();
+        			try {
+        				//FileScanner.counter++;
+						inc();
+        				t.join();
+					} catch (InterruptedException e) {
+						
+						e.printStackTrace();
+					}
+        			
+        			
+        			
+        		}
+
+
+            //TODO: wait for all the FileScanner-s to finish
+        }
+
+    }
+
+    public static void main (String [] args) throws InterruptedException{
+//    	Desktop d=Desktop.getDesktop();
+//  	d.getDesktop().open(new File("."));
+        String FILE_TO_SCAN = "C:\\Users\\Elena (kozle) Rtoska\\Desktop\\BLABLA\\zadaci";
+    	//String FILE_TO_SCAN=".";
+        //TODO Construct a FileScanner object with the fileToScan = FILE_TO_SCAN
+        FileScanner fileScanner=new FileScanner(FILE_TO_SCAN);
+      
+    	
+    
+
+        //TODO Start the thread from type FileScanner
+        Thread t1=new Thread(fileScanner);
+        t1.start();
+        //TODO wait for the fileScanner to finish
+        t1.join();
+        //TODO print a message that displays the number of thread that were created
+        System.err.println(fileScanner.getCounter());
+
+    }
+}
+
